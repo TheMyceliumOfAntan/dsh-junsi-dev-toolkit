@@ -16,9 +16,22 @@
 // 用 Node builtin 实现，preset-local 模块可用，无 bare import。
 
 import { spawn } from 'node:child_process'
+import { TextDecoder } from 'node:util'
 
 export const inject = ['tools']
 export const name = 'git'
+
+// 解码缓冲区：优先 UTF-8，若出现替换符(�)则按 GBK/CP936 重解（Windows git 默认输出 GBK）
+function decode(buf) {
+  const utf8 = new TextDecoder('utf-8')
+  const s = utf8.decode(buf)
+  if (!s.includes('\uFFFD')) return s
+  try {
+    return new TextDecoder('gbk').decode(buf)
+  } catch {
+    return s
+  }
+}
 
 function workspaceOf(exec) {
   const cwd = exec?.agent?.session?.header?.cwd
@@ -43,22 +56,49 @@ function runGit(args, opts) {
   return new Promise((resolve) => {
     let stdout = ''
     let stderr = ''
+    const nv = { ...process.env }
+    // 强交互关闭：否则 rebase --continue / commit / merge / credential prompt 会阻塞读 stdin / 起编辑器
+    nv.GIT_EDITOR = 'true'
+    nv.GIT_SEQUENCE_EDITOR = 'true'
+    nv.GIT_MERGE_AUTOEDIT = 'no'
+    nv.GIT_TERMINAL_PROMPT = '0'
+    nv.GIT_PAGER = 'cat'
+    // stdin 用 'ignore'：任何 git 读 stdin 立即得到 EOF，绝不阻塞挂起；stdout/stderr 用管道捕获
     const child = spawn('git', args, {
       cwd: opts.cwd,
-      env: process.env,
+      env: nv,
       windowsHide: true,
       shell: false,
+      stdio: ['ignore', 'pipe', 'pipe'],
     })
-    child.stdout?.on('data', (d) => (stdout += d.toString()))
-    child.stderr?.on('data', (d) => (stderr += d.toString()))
-    const timeout = setTimeout(() => child.kill('SIGKILL'), opts.timeoutMs || 120000)
+    child.stdout?.on('data', (d) => (stdout += decode(d)))
+    child.stderr?.on('data', (d) => (stderr += decode(d)))
+    const timeoutMs = opts.timeoutMs || 120000
+    let timedOut = false
+    const killTree = () => {
+      timedOut = true
+      try { child.kill('SIGKILL') } catch {}
+      // Windows：git 可能拉起 editor/ssh 子进程持有管道导致 close 不触发，强制结束进程树
+      if (process.platform === 'win32' && child.pid) {
+        try {
+          const task = spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true })
+          const guard = setTimeout(() => { try { task.kill('SIGKILL') } catch {} }, 3000)
+          task.on('close', () => clearTimeout(guard))
+        } catch {}
+      }
+    }
+    const timeout = setTimeout(killTree, timeoutMs)
     child.on('error', (err) => {
       clearTimeout(timeout)
       resolve({ code: -1, stdout, stderr: stderr || err.message })
     })
     child.on('close', (code, signal) => {
       clearTimeout(timeout)
-      resolve({ code: code ?? (signal ? -2 : -3), stdout, stderr })
+      resolve({
+        code: code ?? (signal ? -2 : -3),
+        stdout,
+        stderr: timedOut ? stderr + `\n[timeout] 命令超过 ${timeoutMs}ms 已被终止（可能 git 在等输入/编辑器/网络）。` : stderr,
+      })
     })
   })
 }
