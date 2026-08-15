@@ -152,6 +152,9 @@
 - id: tool-search
   name: './plugins/tool-search.mjs'
   config: {}
+- id: git
+  name: './plugins/git.mjs'
+  config: {}
 - id: routing
   name: './plugins/routing.mjs'
   config: {}

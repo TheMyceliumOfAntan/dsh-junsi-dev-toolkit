@@ -8,6 +8,7 @@
 - **任务自动路由**：按关键词把请求分流到子技能（加功能 / 修 Bug / 移植 / 文档 / 记忆 / 顾问 / 集群 / 浏览器自动化）。
 - **7 个 memory 工具**：`store-decision` / `save-progress` / `prepare-handoff` / `restore-handoff` / `list-decisions` / `memory-doctor` / `save-preference`，决策与进度写入当前工作区 `.memory/`（项目隔离）。
 - **tool-search**：按关键词检索最合适工具。
+- **git 工具**：通用 git 透传（`status`/`add`/`commit`/`push`/`pull`/`fetch`/`clone`...）。以 HOST 完整身份直接运行 git（不经受限沙箱），能访问你的 git 凭据(PAT/ssh agent/`~/.ssh`)与 `ssh.exe`，解决 DSH 沙箱隔离凭据导致 GitHub HTTP/SSH `pull`/`push` 认证失败的问题。
 - **远程更新预检（Gate 0）**：加功能/修 Bug/移植前，先 `git fetch` + 查远程提交/CHANGELOG/Release Notes（可 web_search），确认问题/需求是否已被上游实现或修复，避免重复造轮子。
 - **MCP 支持**：`project-docs`（项目文档/代码感知）+ `playwright`（浏览器自动化），通过 DSH 官方 `dsh-mcp-client` 承接。
 - 复用 DSH 官方 `@deepseek-ai/dsh-*` 包：子技能加载、定时提醒、subagent 集群、目标、计划模式、待办、提问等。
@@ -34,6 +35,7 @@ dsh-junsi-dev-toolkit/
 ├── plugins/                  # 自研 preset-local 插件（相对路径引用）
 │   ├── memory-tools.mjs      # 7 个 memory 工具
 │   ├── tool-search.mjs       # tool-search
+│   ├── git.mjs               # 通用 git 工具（HOST 身份运行，访问凭据）
 │   └── routing.mjs           # 路由提示段（systemPrompt）
 ├── preset/                   # agent preset 模板（要自建 preset 时用）
 │   ├── agent.cordis.yml

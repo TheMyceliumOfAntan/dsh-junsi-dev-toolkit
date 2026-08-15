@@ -20,7 +20,7 @@ for (const sub of ['advisor','cluster','code-migrater','computer-use','diagnose-
 check(req('skills/junsi-dev-toolkit/shared/ai-compliance.md'), 'skills/junsi-dev-toolkit/shared/ai-compliance.md')
 
 // plugins
-for (const p of ['memory-tools.mjs','tool-search.mjs','routing.mjs']) {
+for (const p of ['memory-tools.mjs','tool-search.mjs','routing.mjs','git.mjs']) {
   check(req(`plugins/${p}`), `plugins/${p}`)
 }
 
