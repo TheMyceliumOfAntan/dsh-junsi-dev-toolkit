@@ -1,0 +1,24 @@
+{
+  "name": "junsi-dev-toolkit-dsh",
+  "version": "1.0.0",
+  "description": "JunSi开发工具包 — DeepSeek Harness (DSH) 版开发任务工具包：任务路由、7 个 memory 工具、tool-search、MCP 文档/浏览器自动化。",
+  "type": "module",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "agent-preset",
+    "skills",
+    "memory",
+    "debugging",
+    "code-migration",
+    "mcp"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TheMyceliumOfAntan/dsh-junsi-dev-toolkit.git"
+  },
+  "scripts": {
+    "verify": "node scripts/verify-structure.mjs"
+  }
+}
