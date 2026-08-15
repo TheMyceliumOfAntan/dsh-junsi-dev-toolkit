@@ -162,7 +162,8 @@
 # ── junsi-dev-toolkit: MCP servers ──────────────────────────────────────────
 #
 # ★ 需按本机替换：mcp-server.py 路径改成你 clone 本仓库后的绝对路径。
-#   (这里用 DSH_HOME/.agent-presets 作为示例预设落点；若你用别处，改这一行)
+#   注意：不要用 process.env.DSH_HOME 拼接——在 dsh web 后端里该环境变量不可靠，
+#   会拼出形如 C:\Users\<你>\undefined\.agent-presets\... 的坏路径。直接写绝对路径。
 - id: mcp-project-docs
   name: '@deepseek-ai/dsh-mcp-client'
   config:
@@ -170,7 +171,7 @@
     transport: stdio
     command: python
     args:
-      - !!js 'process.env.DSH_HOME + "/.agent-presets/junsi-dev-toolkit/mcp/project-docs/mcp-server.py"'
+      - 'C:/REPLACE-WITH-PATH-TO/this-repo/mcp/project-docs/mcp-server.py'
     env:
       PYTHONUNBUFFERED: '1'
 
