@@ -59,7 +59,10 @@
   name: '@deepseek-ai/dsh-skill-filesystem'
   config:
     customSkillDirs:
+      # 主技能包 junsi-dev-toolkit
       - 'C:/REPLACE-WITH-PATH-TO/this-repo/skills'
+      # 子技能平级注册：指向技能包目录，一层发现到全部子技能
+      - 'C:/REPLACE-WITH-PATH-TO/this-repo/skills/junsi-dev-toolkit'
 
 - id: tool-skill
   name: '@deepseek-ai/dsh-tool-skill'

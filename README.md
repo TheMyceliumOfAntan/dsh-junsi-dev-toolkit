@@ -5,7 +5,7 @@
 
 ## 它能做什么
 
-- **任务自动路由**：按关键词把请求分流到子技能（加功能 / 修 Bug / 移植 / 文档 / 记忆 / 顾问 / 集群 / 浏览器自动化）。
+- **任务自动路由**：按关键词把请求分流到子技能（加功能 / 修 Bug / 移植 / 文档 / 记忆 / 顾问 / 集群 / 浏览器自动化）。**8 个子技能均独立注册**，可直接 `skill("code-migrater")`、`skill("diagnose-before-fix")` 等按名加载。
 - **7 个 memory 工具**：`store-decision` / `save-progress` / `prepare-handoff` / `restore-handoff` / `list-decisions` / `memory-doctor` / `save-preference`，决策与进度写入当前工作区 `.memory/`（项目隔离）。
 - **tool-search**：按关键词检索最合适工具。
 - **git 工具**：通用 git 透传（`status`/`add`/`commit`/`push`/`pull`/`fetch`/`clone`...）。以 HOST 完整身份直接运行 git（不经受限沙箱），能访问你的 git 凭据(PAT/ssh agent/`~/.ssh`)与 `ssh.exe`，解决 DSH 沙箱隔离凭据导致 GitHub HTTP/SSH `pull`/`push` 认证失败的问题。
@@ -64,9 +64,10 @@ dsh-junsi-dev-toolkit/
    Copy-Item .\skills $dst\skills -Recurse -Force
    ```
 3. **编辑 `$dst\agent.cordis.yml` 两处**（★ 标记）：
-   - `skill-filesystem.customSkillDirs` → 你的 `$dst\skills` 绝对路径。
+   - `skill-filesystem.customSkillDirs` → 你的 `$dst\skills` 绝对路径（**两行都要填你的实际路径**：第一行指 `skills` 根挂主技能包，第二行指 `skills\junsi-dev-toolkit` 让 8 个子技能也独立注册为可 `skill(...)` 加载的条目）。
    - `mcp-project-docs` 的 `mcp-server.py` `args` 路径 → 你的 `$dst\mcp\project-docs\mcp-server.py`。
 4. 在 DSH 会话里选择 preset「JunSi开发工具包」起新会话。
+   > 子技能已独立注册：可直接 `skill("code-migrater")`、`skill("diagnose-before-fix")` 等按名加载，不再报 "unknown or no longer available"。
 
 ### 方式 B：只挂技能（已有 preset 想加这套 skill）
 
