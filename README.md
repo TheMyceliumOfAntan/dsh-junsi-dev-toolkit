@@ -40,6 +40,9 @@ dsh-junsi-dev-toolkit/
 ├── preset/                   # agent preset 模板（要自建 preset 时用）
 │   ├── agent.cordis.yml
 │   └── preset.yml
+├── preset-v4pro/             # V4 Pro 优化极简 preset（persona: You are a helpful software engineer assistant）
+│   ├── agent.cordis.yml
+│   └── preset.yml
 └── mcp/
     └── project-docs/         # project-docs MCP server
         ├── mcp-server.py
@@ -109,6 +112,23 @@ dsh-junsi-dev-toolkit/
 | 回顾决策 | "有哪些决策" |
 | 决策权衡 | "这两个方案怎么选" |
 | 浏览器操作 | "帮我打开网页点一下这个按钮" |
+
+## V4 Pro 提示词优化（minimal-v4pro）
+
+深度求索 V4 Pro (0813) 对特定提示词有优化：在**极简模式**下把 persona 设为 `You are a helpful software engineer assistant.` 能显著提升 V4 Pro 水平（接近 Opus）。
+
+本仓库提供 `preset-v4pro/`（基于官方 `minimal` 预设、persona 即该句、`complete: true`）。要使用：
+
+```powershell
+$dst = "$HOME\.dsh\.agent-presets\minimal-v4pro"
+New-Item -ItemType Directory -Force -Path $dst
+Copy-Item .\preset-v4pro\agent.cordis.yml $dst\
+Copy-Item .\preset-v4pro\preset.yml $dst\
+```
+
+然后在 DSH 会话里选择 preset「极简模式·V4Pro」起会话。
+
+> JunSi开发工具包 preset 的 persona 也已在开头加上了同一句，让默认 dev 会话同样受益。
 
 ## 许可
 

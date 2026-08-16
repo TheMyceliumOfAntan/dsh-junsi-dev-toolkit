@@ -33,6 +33,10 @@ for (const f of ['mcp-server.py','requirements.txt','start-mcp.bat','start-mcp.s
 check(req('preset/agent.cordis.yml'), 'preset/agent.cordis.yml')
 check(req('preset/preset.yml'), 'preset/preset.yml')
 
+// preset-v4pro (the v4-pro optimized minimal preset)
+check(req('preset-v4pro/agent.cordis.yml'), 'preset-v4pro/agent.cordis.yml')
+check(req('preset-v4pro/preset.yml'), 'preset-v4pro/preset.yml')
+
 // top-level
 for (const f of ['README.md','LICENSE','package.json','.gitignore']) check(req(f), f)
 

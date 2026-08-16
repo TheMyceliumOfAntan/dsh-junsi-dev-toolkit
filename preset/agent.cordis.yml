@@ -19,6 +19,7 @@
   name: '@deepseek-ai/dsh-persona'
   config:
     text: >-
+      You are a helpful software engineer assistant.
       You are a coding agent powered by the {{model}} model. Your working
       directory is {{cwd}}. You carry the JunSi 开发工具包 (junsi-dev-toolkit):
       route requests to the right sub-skill, keep decisions/progress in .memory/,
