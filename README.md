@@ -43,6 +43,12 @@ dsh-junsi-dev-toolkit/
 ├── preset-v4pro/             # V4 Pro 优化极简 preset（persona: You are a helpful software engineer assistant）
 │   ├── agent.cordis.yml
 │   └── preset.yml
+├── preset-junsi-v4pro/       # 完整 JunSi + Anchored bootstrap preset（首请求锚定 Minimal，晋升后解锁全部能力）
+│   ├── agent.cordis.yml
+│   ├── preset.yml
+│   ├── tool-bootstrap.mjs 等（来自 xiaobright/dsh-anchored-standard, MIT）
+│   └── plugins/              # JunSi 自研插件
+├── THIRD_PARTY_NOTICES.md    # 第三方代码（dsh-anchored-standard, MIT）版权声明
 └── mcp/
     └── project-docs/         # project-docs MCP server
         ├── mcp-server.py
@@ -131,6 +137,33 @@ Copy-Item .\preset-v4pro\preset.yml $dst\
 > **验证信号（启发式，非绝对）**：当该优化句真正生效时，V4 Pro 的思维链（chain-of-thought）通常会以 **"We need xxx"** 开头（一般方法，不一定每个都如此）。这不能当唯一判据，但对自测"优化句有没有真触发"是个有用的观察点。
 
 > JunSi开发工具包 preset 的 persona 也已在开头加上了同一句，让默认 dev 会话同样受益。
+
+## JunSi开发工具包·DSv4P0813优化（preset-junsi-v4pro）
+
+如果你想**既要 V4 Pro 的锚定优势，又要完整 JunSi 功能**，用 `preset-junsi-v4pro/`。它复用
+[xiaobright/dsh-anchored-standard](https://github.com/xiaobright/dsh-anchored-standard)(MIT) 的
+bootstrap 机制：
+
+- **请求 #1（bootstrap）**：只暴露 Minimal 真实工具对（持久 `bash` + `str_replace_editor`），
+  persona 为 `You are a helpful software engineer assistant.`（`complete: true`），并剥离
+  自动注入的技能目录、AGENTS.md 摘要 → 锚定 "We need…" 轨迹。
+- **首个持久信号后（晋升）**：解锁到完整 JunSi 工具集（7 个 memory 工具 + tool-search + git）
+  + 技能目录 + MCP（project-docs / playwright）+ Standard 能力（subagent / workflow 等，经
+  `dev_tool_search` 按需解锁）。
+
+安装：
+
+```powershell
+$dst = "$HOME\.dsh\.agent-presets\junsi-dev-toolkit-v4pro"
+New-Item -ItemType Directory -Force -Path $dst
+Copy-Item -Recurse .\preset-junsi-v4pro\* $dst\
+Copy-Item -Recurse .\skills $dst\skills
+# 编辑 $dst\agent.cordis.yml 里两处 ★ REPLACE-WITH-PATH-TO（customSkillDirs + mcp-server.py 路径）
+```
+
+然后在 DSH 会话里选择「JunSi开发工具包·DSv4P0813优化」。**新开会话，不要中途切换 preset。**
+
+> 实验性 preset（社区实现机制），非 DeepSeek 官方背书。验证信号同上（首轮 CoT 多 "We need" 开头）。
 
 ## 许可
 

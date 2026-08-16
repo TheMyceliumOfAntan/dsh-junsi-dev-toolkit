@@ -37,8 +37,18 @@ check(req('preset/preset.yml'), 'preset/preset.yml')
 check(req('preset-v4pro/agent.cordis.yml'), 'preset-v4pro/agent.cordis.yml')
 check(req('preset-v4pro/preset.yml'), 'preset-v4pro/preset.yml')
 
+// preset-junsi-v4pro (full JunSi + anchored bootstrap)
+check(req('preset-junsi-v4pro/agent.cordis.yml'), 'preset-junsi-v4pro/agent.cordis.yml')
+check(req('preset-junsi-v4pro/preset.yml'), 'preset-junsi-v4pro/preset.yml')
+for (const m of ['tool-bootstrap.mjs','compaction-epoch.mjs','custom-bash.mjs','dev-tool-search.mjs','instruction-hint.mjs','skill-search.mjs']) {
+  check(req(`preset-junsi-v4pro/${m}`), `preset-junsi-v4pro/${m}`)
+}
+for (const p of ['plugins/memory-tools.mjs','plugins/tool-search.mjs','plugins/git.mjs']) {
+  check(req(`preset-junsi-v4pro/${p}`), `preset-junsi-v4pro/${p}`)
+}
+
 // top-level
-for (const f of ['README.md','LICENSE','package.json','.gitignore']) check(req(f), f)
+for (const f of ['README.md','LICENSE','package.json','.gitignore','THIRD_PARTY_NOTICES.md']) check(req(f), f)
 
 // sanity: plugins must NOT reference `harness` (unavailable to preset-local modules)
 const mem = read1('plugins/memory-tools.mjs')

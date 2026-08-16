@@ -1,0 +1,2 @@
+name: JunSi开发工具包·DSv4P0813优化
+description: 基于 V4 Pro 过拟合特性（必须在 Linux + DSH + 极简 + "You are a helpful software engineer assistant." 开头）锚定首请求的 JunSi 开发工具包完整功能版。首请求只暴露 Minimal 真实工具对（bash + str_replace_editor）并剥离自动上下文以锚定 "We need" 轨迹，首个持久信号后晋升到完整 JunSi 工具集（memory/tool-search/git + 技能 + MCP）/standard 能力。实验性 preset，社区实现机制，非官方背书。
