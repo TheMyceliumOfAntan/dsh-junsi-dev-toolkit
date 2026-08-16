@@ -33,10 +33,6 @@ for (const f of ['mcp-server.py','requirements.txt','start-mcp.bat','start-mcp.s
 check(req('preset/agent.cordis.yml'), 'preset/agent.cordis.yml')
 check(req('preset/preset.yml'), 'preset/preset.yml')
 
-// preset-v4pro (the v4-pro optimized minimal preset)
-check(req('preset-v4pro/agent.cordis.yml'), 'preset-v4pro/agent.cordis.yml')
-check(req('preset-v4pro/preset.yml'), 'preset-v4pro/preset.yml')
-
 // preset-junsi-v4pro (full JunSi + anchored bootstrap)
 check(req('preset-junsi-v4pro/agent.cordis.yml'), 'preset-junsi-v4pro/agent.cordis.yml')
 check(req('preset-junsi-v4pro/preset.yml'), 'preset-junsi-v4pro/preset.yml')
