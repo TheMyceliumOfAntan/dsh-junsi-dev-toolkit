@@ -128,6 +128,8 @@ Copy-Item .\preset-v4pro\preset.yml $dst\
 
 然后在 DSH 会话里选择 preset「极简模式·V4Pro」起会话。
 
+> **验证信号（启发式，非绝对）**：当该优化句真正生效时，V4 Pro 的思维链（chain-of-thought）通常会以 **"We need xxx"** 开头（一般方法，不一定每个都如此）。这不能当唯一判据，但对自测"优化句有没有真触发"是个有用的观察点。
+
 > JunSi开发工具包 preset 的 persona 也已在开头加上了同一句，让默认 dev 会话同样受益。
 
 ## 许可
