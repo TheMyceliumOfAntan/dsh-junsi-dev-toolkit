@@ -419,6 +419,13 @@
   config: {}
 
 # ── JunSi开发工具包：MCP servers（可用 dev_tool_search 解锁）───────────────
+# ★ 需按本机替换：mcp-server.py 路径改成你 clone 本仓库后的绝对路径。
+# 项目根默认「跟随 dsh 启动目录」：cwd 用 !!js process.cwd()，mcp-server.py 会从
+# cwd 向上找项目标记自动判定项目根，建议从你的项目目录启动 dsh web。
+# mcp-server.py 已屏蔽用户主目录：即使从 $HOME 启动（主目录常有 package.json），
+# 也绝不会把主目录误判为项目根、把文档写进 $HOME，而是返回明确提示。
+# 想固定某个项目时：把 cwd 改成项目绝对路径，并在 env 里加 PROJECT_DOCS_ROOT
+# （env 显式指定优先级最高）。
 - id: mcp-project-docs
   name: '@deepseek-ai/dsh-mcp-client'
   config:
@@ -427,6 +434,7 @@
     command: python
     args:
       - 'C:/REPLACE-WITH-PATH-TO/this-repo/skills/junsi-dev-toolkit/project-docs/mcp-server.py'
+    cwd: !!js process.cwd()
     env:
       PYTHONUNBUFFERED: '1'
 

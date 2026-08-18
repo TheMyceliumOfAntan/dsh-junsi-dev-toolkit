@@ -19,18 +19,51 @@ from mcp.types import Tool, TextContent, Resource, ResourceContents, TextResourc
 from pydantic import AnyUrl
 
 # ── 项目根检测 ──────────────────────────────────────────────
-def detect_project_root() -> Path:
-    """从当前目录向上找，直到发现项目标记文件"""
+def detect_project_root() -> Optional[Path]:
+    """项目根检测。
+
+    优先级：
+      1. 显式配置 PROJECT_DOCS_ROOT（环境变量，绝对路径）——最可靠，跨会话也稳。
+      2. 从当前目录(cwd)向上找项目标记（package.json / AGENTS.md / .git /
+         Cargo.toml），或已含 docs/junsi-dev-docs 的目录。
+
+    修复说明：@deepseek-ai/dsh-mcp-client 是用 scrubbed 环境 + 静态 cwd 启动本
+    服务的（DSH_* 全部被剥离，cwd 落在 dsh 启动目录），所以它无法感知「当前会话
+    工作区」。若 dsh 从用户主目录($HOME)启动，主目录常有 package.json，会被误判
+    为项目根，把文档写进 $HOME。因此这里：
+      * 用户主目录本身永不视为项目根（直接跳过）；
+      * 向上找不到真实项目时返回 None（绝不 fallback 到主目录，也绝不 mkdir 进
+        主目录）；调用方在 PROJECT_ROOT 为 None 时给出明确提示。
+    """
+    explicit = os.environ.get("PROJECT_DOCS_ROOT", "").strip()
+    if explicit:
+        p = Path(explicit).resolve()
+        if p.is_dir():
+            return p
+    home = Path.home().resolve()
     cwd = Path(os.getcwd()).resolve()
-    markers = ["package.json", "AGENTS.md", ".git"]
+    markers = ["package.json", "AGENTS.md", ".git", "Cargo.toml"]
     for p in [cwd] + list(cwd.parents):
+        if p == home:
+            continue  # 主目录本身不参与判定，避免把 $HOME 当项目根
         if any((p / m).exists() for m in markers):
             return p
-    return cwd
+        if (p / "docs" / "junsi-dev-docs").is_dir():
+            return p
+    return None
 
 PROJECT_ROOT = detect_project_root()
-DOCS_ROOT = PROJECT_ROOT / "docs" / "junsi-dev-docs"
-DOCS_ROOT.mkdir(parents=True, exist_ok=True)
+NO_PROJECT_MSG = ("⚠️ 未检测到项目根。可能原因：dsh 从用户主目录启动（主目录常含 "
+                  "package.json，已按规则排除，不再会把文档写进主目录）。请任选其一："
+                  "① 从你的项目目录启动 dsh（例如 C:/Project/dsh-junsi-dev-toolkit），"
+                  "本服务会自动跟随各项目；"
+                  "② 在 MCP 配置 mcp-project-docs 的 env 里显式指定 "
+                  "PROJECT_DOCS_ROOT: '<项目根绝对路径>'。")
+if PROJECT_ROOT is not None:
+    DOCS_ROOT = PROJECT_ROOT / "docs" / "junsi-dev-docs"
+    DOCS_ROOT.mkdir(parents=True, exist_ok=True)
+else:
+    DOCS_ROOT = None
 
 CATEGORIES = {
     "1-决策记录": "ADR 架构决策记录",
@@ -517,6 +550,9 @@ async def list_tools() -> list[Tool]:
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     result = ""
 
+    if PROJECT_ROOT is None:
+        return [TextContent(type="text", text=NO_PROJECT_MSG)]
+
     # ── 原文档工具 ──
     if name == "query_docs":
         r = search_docs(arguments.get("keywords",""), arguments.get("category"))
@@ -753,6 +789,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 @app.list_resources()
 async def list_resources() -> list[Resource]:
     res = []
+    if DOCS_ROOT is None:
+        return res
     for cat in CATEGORIES:
         d = DOCS_ROOT / cat
         if d.exists():
@@ -766,6 +804,8 @@ async def list_resources() -> list[Resource]:
 
 @app.read_resource()
 async def read_resource(uri: AnyUrl) -> str:
+    if DOCS_ROOT is None:
+        return NO_PROJECT_MSG
     p = uri.path.lstrip("/")
     fp = DOCS_ROOT / p
     return read_file(fp) if fp.exists() else f"文档不存在：{p}"

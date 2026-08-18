@@ -71,9 +71,11 @@ dsh-junsi-dev-toolkit/
    Copy-Item .\mcp $dst\mcp -Recurse -Force
    Copy-Item .\skills $dst\skills -Recurse -Force
    ```
-3. **编辑 `$dst\agent.cordis.yml` 两处**（★ 标记）：
+3. **编辑 `$dst\agent.cordis.yml`**（★ 标记）：
    - `skill-filesystem.customSkillDirs` → 你的 `$dst\skills` 绝对路径（**两行都要填你的实际路径**：第一行指 `skills` 根挂主技能包，第二行指 `skills\junsi-dev-toolkit` 让 8 个子技能也独立注册为可 `skill(...)` 加载的条目）。
    - `mcp-project-docs` 的 `mcp-server.py` `args` 路径 → 你的 `$dst\mcp\project-docs\mcp-server.py`。
+   - `mcp-project-docs` 的 `cwd`（默认 `!!js process.cwd()`，即 dsh 的启动目录）。想让文档固定落在某个项目下，把它改成该项目根绝对路径，或在 `env` 里显式加 `PROJECT_DOCS_ROOT: '<项目根>'`（该 env 优先级最高）。
+   > **已修复（不再写进 `$HOME`）：** `mcp-server.py` 的 `detect_project_root()` 现会屏蔽用户主目录——即使 dsh 从 `$HOME` 启动（主目录常有 `package.json`），也绝不会把主目录误判为项目根、把文档写进 `$HOME`；找不到真实项目时返回明确提示。未设 cwd/PROJECT_DOCS_ROOT 时按 dsh 启动目录自动跟随项目（建议从项目目录启动 `dsh web`）。
 4. 在 DSH 会话里选择 preset「JunSi开发工具包」起新会话。
    > 子技能已独立注册：可直接 `skill("code-migrater")`、`skill("diagnose-before-fix")` 等按名加载，不再报 "unknown or no longer available"。
 
@@ -92,7 +94,7 @@ dsh-junsi-dev-toolkit/
 ## 前置条件
 
 - **DSH 运行时**：使用的是 DeepSeek Harness（DeepSeek Harness 的 agent preset 机制）。
-- **`project-docs` MCP**（可选）：本机需 `python` + `pip install mcp pydantic`（见 `mcp/project-docs/requirements.txt`）。
+- **`project-docs` MCP**（必须）：本机需 `python` + `pip install mcp pydantic`（见 `mcp/project-docs/requirements.txt`）。
 - **`playwright` MCP**（可选）：需 `npx` 能解析 `@playwright/mcp@latest`。
 - 未满足上述 MCP 前置时，对应 MCP 工具不可用，不影响 preset 其余能力。
 
@@ -142,7 +144,7 @@ $dst = "$HOME\.dsh\.agent-presets\junsi-dev-toolkit-v4pro"
 New-Item -ItemType Directory -Force -Path $dst
 Copy-Item -Recurse .\preset-junsi-v4pro\* $dst\
 Copy-Item -Recurse .\skills $dst\skills
-# 编辑 $dst\agent.cordis.yml 里两处 ★ REPLACE-WITH-PATH-TO（customSkillDirs + mcp-server.py 路径）
+# 编辑 $dst\agent.cordis.yml 里三处 ★ REPLACE-WITH-PATH-TO（customSkillDirs + mcp-server.py 路径 + cwd/PROJECT_DOCS_ROOT 项目根）
 ```
 
 然后在 DSH 会话里选择「JunSi开发工具包·DSv4P0813优化」。**新开会话，不要中途切换 preset。**
