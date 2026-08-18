@@ -30,6 +30,16 @@ MCP Server 提供两类能力：
 | 看前端 API 调用 | `api_client` |
 | 看状态管理 | `stores` |
 | 看自定义 Hook | `hooks` |
+| 显式指定项目根 | `set_project_root` |
+
+## 项目根定位（重要）
+
+- MCP Server 会尝试从启动目录自动判定项目根，但**自动检测失败或想切换项目时**：
+  **先用 `set_project_root(path='<项目根绝对路径>')` 显式指定项目根**，再调用其它工具。
+  其中 `<项目根绝对路径>` = 当前会话工作目录（即你的工作目录，如 `C:/Project/Qomicex.Tauri`）。
+- 命令行客户端/CLI 预期你用当前工作目录作为项目根；Web 会话从主目录启动时自动检测会失败，
+  此时必须调用 `set_project_root` 传入你正在开发的项目的绝对路径。
+- 已设项目根后，所有文档读写、API 端点、路由、组件扫描都以它为基准（`<项目根>/docs/junsi-dev-docs/`）。
 
 ## 在 junsi-dev-toolkit 中的使用
 

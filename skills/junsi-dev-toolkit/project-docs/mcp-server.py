@@ -53,17 +53,31 @@ def detect_project_root() -> Optional[Path]:
     return None
 
 PROJECT_ROOT = detect_project_root()
-NO_PROJECT_MSG = ("⚠️ 未检测到项目根。可能原因：dsh 从用户主目录启动（主目录常含 "
-                  "package.json，已按规则排除，不再会把文档写进主目录）。请任选其一："
-                  "① 从你的项目目录启动 dsh（例如 C:/Project/dsh-junsi-dev-toolkit），"
-                  "本服务会自动跟随各项目；"
-                  "② 在 MCP 配置 mcp-project-docs 的 env 里显式指定 "
-                  "PROJECT_DOCS_ROOT: '<项目根绝对路径>'。")
+NO_PROJECT_MSG = ("⚠️ 未检测到项目根（dsh 从用户主目录启动时无法把 cwd 当作项目根）。"
+                  "请调用 set_project_root 传入项目根绝对路径，例如 "
+                  "set_project_root(path='C:/Project/Qomicex.Tauri')；或从项目目录启动 "
+                  "dsh，或在 MCP 配置 env 里显式指定 PROJECT_DOCS_ROOT。")
 if PROJECT_ROOT is not None:
     DOCS_ROOT = PROJECT_ROOT / "docs" / "junsi-dev-docs"
     DOCS_ROOT.mkdir(parents=True, exist_ok=True)
 else:
     DOCS_ROOT = None
+
+
+def apply_project_root(path: str) -> str:
+    """运行时显式设定项目根（供 AI 通过 set_project_root 调用）。
+
+    直接以 AI 传入的项目路径为基准重建 PROJECT_ROOT/DOCS_ROOT，绕开对 dsh
+    启动目录(cwd)的依赖——这是让 project-docs 跟随「当前会话工作区」的可靠方式。
+    """
+    global PROJECT_ROOT, DOCS_ROOT
+    p = Path(str(path).strip() or "").resolve()
+    if not p.is_dir():
+        return f"❌ 传入路径不是有效目录：{path or '(空)'}"
+    PROJECT_ROOT = p
+    DOCS_ROOT = PROJECT_ROOT / "docs" / "junsi-dev-docs"
+    DOCS_ROOT.mkdir(parents=True, exist_ok=True)
+    return f"✅ 项目根已设为 `{PROJECT_ROOT}`（文档目录 `{DOCS_ROOT}`，所有扫描/写入以它为基准）"
 
 CATEGORIES = {
     "1-决策记录": "ADR 架构决策记录",
@@ -462,6 +476,11 @@ def _extract_code_context(rel_path: str) -> Dict[str, Any]:
 async def list_tools() -> list[Tool]:
     return [
         # ── 原文档工具 ──
+        Tool(name="set_project_root",
+             description="显式设置 project-docs 的项目根目录（所有文档/API/路由/组件扫描都以它为基准）。当自动检测失败或想切换项目时调用，传入项目根绝对路径，如 'C:/Project/Qomicex.Tauri'。",
+             inputSchema={"type": "object", "properties": {
+                 "path": {"type": "string", "description": "项目根绝对路径，如 'C:/Project/Qomicex.Tauri'"}
+             }, "required": ["path"]}),
         Tool(name="query_docs",
              description="查询项目文档。根据关键词搜索 docs/junsi-dev-docs/ 下的所有文档，返回匹配的文档摘要和路径。",
              inputSchema={"type": "object","properties": {
@@ -549,6 +568,9 @@ async def list_tools() -> list[Tool]:
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     result = ""
+
+    if name == "set_project_root":
+        return [TextContent(type="text", text=apply_project_root(arguments.get("path", "")))]
 
     if PROJECT_ROOT is None:
         return [TextContent(type="text", text=NO_PROJECT_MSG)]
